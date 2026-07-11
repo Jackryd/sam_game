@@ -50,39 +50,41 @@ export default function TraitCard({ trait, onDecide }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-8 py-4">
-      <motion.div
-        style={{ x, rotate }}
-        drag={locked ? false : 'x'}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.9}
-        onDragEnd={handleDragEnd}
-        animate={controls}
-        whileTap={{ scale: 1.03 }}
-        className="relative flex aspect-[3/4] w-full max-w-xs cursor-grab touch-none select-none items-center justify-center rounded-3xl bg-white p-6 text-center shadow-2xl active:cursor-grabbing"
-      >
-        <motion.span
-          style={{ opacity: dealOpacity }}
-          className="absolute left-4 top-4 rotate-[-12deg] rounded-lg border-4 border-rose-500 px-3 py-1 text-xl font-black text-rose-500"
+    <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-5 py-2">
+      <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+        <motion.div
+          style={{ x, rotate }}
+          drag={locked ? false : 'x'}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.9}
+          onDragEnd={handleDragEnd}
+          animate={controls}
+          whileTap={{ scale: 1.03 }}
+          className="relative flex aspect-[3/4] max-h-full w-full max-w-xs cursor-grab touch-none select-none items-center justify-center rounded-3xl bg-white p-6 text-center shadow-2xl active:cursor-grabbing [@media(min-height:820px)]:max-w-sm"
         >
-          NOPE
-        </motion.span>
-        <motion.span
-          style={{ opacity: keepOpacity }}
-          className="absolute right-4 top-4 rotate-[12deg] rounded-lg border-4 border-emerald-500 px-3 py-1 text-xl font-black text-emerald-500"
-        >
-          KEEP
-        </motion.span>
-        <p className="text-2xl font-extrabold leading-snug text-purple-950">
-          {trait}
-        </p>
-      </motion.div>
+          <motion.span
+            style={{ opacity: dealOpacity }}
+            className="absolute left-4 top-4 rotate-[-12deg] rounded-lg border-4 border-rose-500 px-3 py-1 text-xl font-black text-rose-500"
+          >
+            NOPE
+          </motion.span>
+          <motion.span
+            style={{ opacity: keepOpacity }}
+            className="absolute right-4 top-4 rotate-[12deg] rounded-lg border-4 border-emerald-500 px-3 py-1 text-xl font-black text-emerald-500"
+          >
+            KEEP
+          </motion.span>
+          <p className="text-2xl font-extrabold leading-snug text-purple-950 [@media(min-height:820px)]:text-3xl">
+            {trait}
+          </p>
+        </motion.div>
+      </div>
 
       <p className="text-sm font-semibold text-white/70">
         Swipe the card or tap a button below
       </p>
 
-      <div className="flex w-full max-w-xs gap-4">
+      <div className="flex w-full max-w-xs gap-4 [@media(min-height:820px)]:max-w-sm">
         <Button
           variant="dealbreaker"
           onClick={() => resolve(true)}

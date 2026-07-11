@@ -9,7 +9,7 @@ export default function GameScreen({ players, traitQueue, turnIndex, onDecide })
   const progress = (turnIndex / traitQueue.length) * 100
 
   return (
-    <div className="flex min-h-dvh flex-col px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="flex h-dvh flex-col overflow-hidden px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
         <div
           className="h-full rounded-full bg-white transition-all duration-300"
