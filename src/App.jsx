@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PlayerSetup from './components/PlayerSetup'
 import TraitSetup from './components/TraitSetup'
 import GameScreen from './components/GameScreen'
 import ResultsScreen from './components/ResultsScreen'
 import { shuffle } from './utils/shuffle'
+import { deleteCookie, getCookie, setCookie } from './utils/cookies'
 
 const PHASES = {
   PLAYERS: 'players',
@@ -12,15 +13,40 @@ const PHASES = {
   RESULTS: 'results',
 }
 
+const COOKIE_NAME = 'dealbreakers_state'
+
+function loadSavedState() {
+  try {
+    const raw = getCookie(COOKIE_NAME)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    const needsPlayers = parsed.phase === PHASES.GAME || parsed.phase === PHASES.RESULTS
+    if (needsPlayers && !parsed.players?.length) return null
+    if (parsed.phase === PHASES.GAME && !parsed.traitQueue?.length) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
 function App() {
-  const [phase, setPhase] = useState(PHASES.PLAYERS)
-  const [playerNames, setPlayerNames] = useState([])
-  const [traitList, setTraitList] = useState([])
+  const [saved] = useState(loadSavedState)
+
+  const [phase, setPhase] = useState(saved?.phase ?? PHASES.PLAYERS)
+  const [playerNames, setPlayerNames] = useState(saved?.playerNames ?? [])
+  const [traitList, setTraitList] = useState(saved?.traitList ?? [])
 
   // Game-only state, (re)initialized each time the game starts.
-  const [players, setPlayers] = useState([])
-  const [traitQueue, setTraitQueue] = useState([])
-  const [turnIndex, setTurnIndex] = useState(0)
+  const [players, setPlayers] = useState(saved?.players ?? [])
+  const [traitQueue, setTraitQueue] = useState(saved?.traitQueue ?? [])
+  const [turnIndex, setTurnIndex] = useState(saved?.turnIndex ?? 0)
+
+  useEffect(() => {
+    setCookie(
+      COOKIE_NAME,
+      JSON.stringify({ phase, playerNames, traitList, players, traitQueue, turnIndex }),
+    )
+  }, [phase, playerNames, traitList, players, traitQueue, turnIndex])
 
   function startGame() {
     setPlayers(playerNames.map((name) => ({ name, traits: [] })))
@@ -49,6 +75,7 @@ function App() {
   }
 
   function playAgain() {
+    deleteCookie(COOKIE_NAME)
     setPhase(PHASES.PLAYERS)
     setPlayerNames([])
     setTraitList([])
@@ -62,8 +89,24 @@ function App() {
     setTraitList([])
   }
 
+  function handleNewGameClick() {
+    if (window.confirm('Start a new game? This clears the current players and traits.')) {
+      playAgain()
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
+      {phase !== PHASES.RESULTS && (
+        <button
+          type="button"
+          onClick={handleNewGameClick}
+          aria-label="Start new game"
+          className="fixed right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-20 grid h-10 w-10 place-items-center rounded-full bg-black/20 text-lg text-white backdrop-blur-sm transition-transform active:scale-90 active:bg-black/30"
+        >
+          ↺
+        </button>
+      )}
       {phase === PHASES.PLAYERS && (
         <PlayerSetup
           playerNames={playerNames}
