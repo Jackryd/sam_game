@@ -4,6 +4,7 @@ import TraitSetup from './components/TraitSetup'
 import GameScreen from './components/GameScreen'
 import ResultsScreen from './components/ResultsScreen'
 import { shuffle } from './utils/shuffle'
+import { randomName } from './utils/swedishNames'
 import { deleteCookie, getCookie, setCookie } from './utils/cookies'
 
 const PHASES = {
@@ -49,10 +50,21 @@ function App() {
   }, [phase, playerNames, traitList, players, traitQueue, turnIndex])
 
   function startGame() {
-    setPlayers(playerNames.map((name) => ({ name, traits: [] })))
+    setPlayers(playerNames.map((name) => ({ name, traits: [], date: null })))
     setTraitQueue(shuffle(traitList))
     setTurnIndex(0)
     setPhase(PHASES.GAME)
+  }
+
+  function selectDate(gender) {
+    const playerIndex = turnIndex % players.length
+    setPlayers((prev) =>
+      prev.map((player, i) =>
+        i === playerIndex
+          ? { ...player, date: { gender, name: randomName(gender) } }
+          : player,
+      ),
+    )
   }
 
   function decide(isDealbreaker) {
@@ -128,6 +140,7 @@ function App() {
           traitQueue={traitQueue}
           turnIndex={turnIndex}
           onDecide={decide}
+          onSelectDate={selectDate}
         />
       )}
       {phase === PHASES.RESULTS && (

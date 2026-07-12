@@ -27,6 +27,12 @@ export default function ResultsScreen({ players, onPlayAgain, onRematchSameGroup
                 <h2 className="text-2xl font-extrabold">
                   {isWinner && '👑 '}
                   {player.name}
+                  {player.date && (
+                    <span className="text-base font-bold opacity-80">
+                      {' '}
+                      + {player.date.name} {player.date.gender === 'man' ? '👨' : '👩'}
+                    </span>
+                  )}
                 </h2>
                 <span className="text-sm font-bold opacity-80">
                   {player.traits.length} kept
