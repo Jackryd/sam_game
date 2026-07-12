@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import Button from './Button'
+import wildcardImg from '../assets/wildcard.jpeg'
 
 const SWIPE_THRESHOLD = 110
+const WILDCARD_CHANCE = 0.1
 
 export default function TraitCard({ trait, onDecide }) {
   const x = useMotionValue(0)
@@ -11,6 +13,9 @@ export default function TraitCard({ trait, onDecide }) {
   const dealOpacity = useTransform(x, [-120, -20], [1, 0])
   const controls = useAnimation()
   const [locked, setLocked] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  // Rolled once per card (the component remounts every turn).
+  const [isWildcard] = useState(() => Math.random() < WILDCARD_CHANCE)
 
   useEffect(() => {
     controls.set({ x: 0, rotate: 0, scale: 0.9, opacity: 0, y: 24 })
@@ -24,7 +29,7 @@ export default function TraitCard({ trait, onDecide }) {
   }, [trait])
 
   function resolve(isDealbreaker) {
-    if (locked) return
+    if (locked || !revealed) return
     setLocked(true)
     controls
       .start({
@@ -37,7 +42,7 @@ export default function TraitCard({ trait, onDecide }) {
   }
 
   function handleDragEnd(_, info) {
-    if (locked) return
+    if (locked || !revealed) return
     if (info.offset.x > SWIPE_THRESHOLD) resolve(false)
     else if (info.offset.x < -SWIPE_THRESHOLD) resolve(true)
     else {
@@ -51,44 +56,76 @@ export default function TraitCard({ trait, onDecide }) {
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-5 py-2">
-      <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+      <div className="flex min-h-0 w-full flex-1 items-center justify-center [perspective:1200px]">
         <motion.div
           style={{ x, rotate }}
-          drag={locked ? false : 'x'}
+          drag={locked || !revealed ? false : 'x'}
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.9}
           onDragEnd={handleDragEnd}
+          onTap={() => !revealed && setRevealed(true)}
           animate={controls}
           whileTap={{ scale: 1.03 }}
-          className="relative flex aspect-[3/4] max-h-full w-full max-w-xs cursor-grab touch-none select-none items-center justify-center rounded-3xl bg-white p-6 text-center shadow-2xl active:cursor-grabbing [@media(min-height:820px)]:max-w-sm"
+          className={`relative aspect-[3/4] max-h-full w-full max-w-xs touch-none select-none [@media(min-height:820px)]:max-w-sm ${
+            revealed ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+          }`}
         >
-          <motion.span
-            style={{ opacity: dealOpacity }}
-            className="absolute left-4 top-4 rotate-[-12deg] rounded-lg border-4 border-rose-500 px-3 py-1 text-xl font-black text-rose-500"
+          <motion.div
+            className="relative h-full w-full [transform-style:preserve-3d]"
+            initial={false}
+            animate={{ rotateY: revealed ? -360 : 180 }}
+            transition={{ duration: 0.8, ease: [0.3, 0.6, 0.3, 1] }}
           >
-            NOPE
-          </motion.span>
-          <motion.span
-            style={{ opacity: keepOpacity }}
-            className="absolute right-4 top-4 rotate-[12deg] rounded-lg border-4 border-emerald-500 px-3 py-1 text-xl font-black text-emerald-500"
-          >
-            KEEP
-          </motion.span>
-          <p className="text-2xl font-extrabold leading-snug text-purple-950 [@media(min-height:820px)]:text-3xl">
-            {trait}
-          </p>
+            {/* Front face */}
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-3xl bg-white p-6 text-center shadow-2xl [backface-visibility:hidden]">
+              {isWildcard ? (
+                <img
+                  src={wildcardImg}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : (
+                <p className="text-2xl font-extrabold leading-snug text-purple-950 [@media(min-height:820px)]:text-3xl">
+                  {trait}
+                </p>
+              )}
+              <motion.span
+                style={{ opacity: dealOpacity }}
+                className="absolute left-4 top-4 rotate-[-12deg] rounded-lg border-4 border-rose-500 bg-white/80 px-3 py-1 text-xl font-black text-rose-500"
+              >
+                NOPE
+              </motion.span>
+              <motion.span
+                style={{ opacity: keepOpacity }}
+                className="absolute right-4 top-4 rotate-[12deg] rounded-lg border-4 border-emerald-500 bg-white/80 px-3 py-1 text-xl font-black text-emerald-500"
+              >
+                KEEP
+              </motion.span>
+            </div>
+
+            {/* Back face */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-500 via-purple-600 to-indigo-600 shadow-2xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <span className="text-7xl drop-shadow-lg">🎴</span>
+              <span className="text-xl font-extrabold uppercase tracking-widest text-white/90">
+                Tap to reveal
+              </span>
+              <span className="absolute left-5 top-5 text-2xl opacity-60">✨</span>
+              <span className="absolute bottom-5 right-5 text-2xl opacity-60">✨</span>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
 
       <p className="text-sm font-semibold text-white/70">
-        Swipe the card or tap a button below
+        {revealed ? 'Swipe the card or tap a button below' : 'Tap the card to flip it over'}
       </p>
 
       <div className="flex w-full max-w-xs gap-4 [@media(min-height:820px)]:max-w-sm">
         <Button
           variant="dealbreaker"
           onClick={() => resolve(true)}
-          disabled={locked}
+          disabled={locked || !revealed}
           className="flex-1"
         >
           💔 Dealbreaker
@@ -96,7 +133,7 @@ export default function TraitCard({ trait, onDecide }) {
         <Button
           variant="keep"
           onClick={() => resolve(false)}
-          disabled={locked}
+          disabled={locked || !revealed}
           className="flex-1"
         >
           💚 Keep it
