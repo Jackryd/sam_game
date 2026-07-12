@@ -4,7 +4,7 @@ import Button from './Button'
 import wildcardImg from '../assets/wildcard.jpeg'
 
 const SWIPE_THRESHOLD = 110
-const WILDCARD_CHANCE = 0.1
+const WILDCARD_CHANCE = 0.01
 
 export default function TraitCard({ trait, onDecide }) {
   const x = useMotionValue(0)
