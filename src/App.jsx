@@ -72,11 +72,14 @@ function App() {
     const trait = traitQueue[turnIndex]
 
     setPlayers((prev) =>
-      prev.map((player, i) =>
-        i === playerIndex
-          ? { ...player, traits: isDealbreaker ? [] : [...player.traits, trait] }
-          : player,
-      ),
+      prev.map((player, i) => {
+        if (i !== playerIndex) return player
+        // A dealbreaker ends the whole date: next turn starts a new first
+        // date with a fresh gender pick and a new random name.
+        return isDealbreaker
+          ? { ...player, traits: [], date: null }
+          : { ...player, traits: [...player.traits, trait] }
+      }),
     )
 
     const nextIndex = turnIndex + 1

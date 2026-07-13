@@ -76,11 +76,11 @@ export default function TraitCard({ trait, onDecide }) {
           <motion.div
             className="relative h-full w-full [transform-style:preserve-3d]"
             initial={false}
-            animate={{ rotateY: revealed ? (megaSpin ? 180 - 3780 : 0) : 180 }}
+            animate={{ rotateY: revealed ? (megaSpin ? 180 - 1260 : 0) : 180 }}
             transition={
               revealed
                 ? megaSpin
-                  ? { duration: 3, ease: [0.2, 0.6, 0.35, 1] }
+                  ? { duration: 1.2, ease: [0.2, 0.6, 0.35, 1] }
                   : { duration: 0.6, ease: [0.3, 0.6, 0.3, 1] }
                 : { duration: 0 }
             }
