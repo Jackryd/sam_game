@@ -3,6 +3,7 @@ import PlayerSetup from './components/PlayerSetup'
 import TraitSetup from './components/TraitSetup'
 import GameScreen from './components/GameScreen'
 import ResultsScreen from './components/ResultsScreen'
+import DinoGame from './components/DinoGame'
 import { shuffle } from './utils/shuffle'
 import { randomName } from './utils/swedishNames'
 import { deleteCookie, getCookie, setCookie } from './utils/cookies'
@@ -32,6 +33,7 @@ function loadSavedState() {
 
 function App() {
   const [saved] = useState(loadSavedState)
+  const [showDino, setShowDino] = useState(false)
 
   const [phase, setPhase] = useState(saved?.phase ?? PHASES.PLAYERS)
   const [playerNames, setPlayerNames] = useState(saved?.playerNames ?? [])
@@ -112,16 +114,27 @@ function App() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {phase !== PHASES.RESULTS && (
+      <div className="fixed right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-20 flex gap-2">
         <button
           type="button"
-          onClick={handleNewGameClick}
-          aria-label="Start new game"
-          className="fixed right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-20 grid h-10 w-10 place-items-center rounded-full bg-black/20 text-lg text-white backdrop-blur-sm transition-transform active:scale-90 active:bg-black/30"
+          onClick={() => setShowDino(true)}
+          aria-label="Play the dino game"
+          className="grid h-10 w-10 place-items-center rounded-full bg-black/20 text-lg backdrop-blur-sm transition-transform active:scale-90 active:bg-black/30"
         >
-          ↺
+          🦖
         </button>
-      )}
+        {phase !== PHASES.RESULTS && (
+          <button
+            type="button"
+            onClick={handleNewGameClick}
+            aria-label="Start new game"
+            className="grid h-10 w-10 place-items-center rounded-full bg-black/20 text-lg text-white backdrop-blur-sm transition-transform active:scale-90 active:bg-black/30"
+          >
+            ↺
+          </button>
+        )}
+      </div>
+      {showDino && <DinoGame onClose={() => setShowDino(false)} />}
       {phase === PHASES.PLAYERS && (
         <PlayerSetup
           playerNames={playerNames}
